@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 荆楚植物文化知识图谱 - 完整问答系统
-修复：alias_map 改为类属性，避免未定义错误
+支持环境变量：NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
 """
 
+import os
 from neo4j import GraphDatabase
 import jieba
 import logging
@@ -23,11 +24,19 @@ class PlantQASystem:
         "茶树": "茶", "桃树": "桃", "银杏树": "银杏", "梧桐树": "梧桐"
     }
 
-    def __init__(self, uri: str, user: str, password: str):
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+    def __init__(self, uri: str = None, user: str = None, password: str = None):
+        """
+        初始化Neo4j连接
+        优先级：传入参数 > 环境变量 > 本地开发默认值
+        """
+        self.uri = uri or os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+        self.user = user or os.environ.get("NEO4J_USER", "neo4j")
+        self.password = password or os.environ.get("NEO4J_PASSWORD", "12345678")
+        
+        self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
         self.plant_names = self._get_all_plants()
         self._setup_jieba()
-        logger.info(f"✅ 完整问答系统已启动，包含 {len(self.plant_names)} 种植物")
+        logger.info(f"✅ 完整问答系统已启动，连接至 {self.uri}，包含 {len(self.plant_names)} 种植物")
 
     def _get_all_plants(self) -> List[str]:
         with self.driver.session() as session:
@@ -323,7 +332,7 @@ class PlantQASystem:
 
 
 def test():
-    qa = PlantQASystem("bolt://localhost:7687", "neo4j", "12345678")
+    qa = PlantQASystem()
     test_qs = [
         "兰有什么文化象征？",
         "菊花的药用价值是什么？",

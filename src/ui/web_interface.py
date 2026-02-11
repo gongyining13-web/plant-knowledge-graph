@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 荆楚植物文化知识图谱 - Web界面
-纯Streamlit原生组件版，不使用手写HTML，杜绝标签泄漏
+纯Streamlit原生组件版，支持环境变量连接Neo4j
 """
 
 import streamlit as st
@@ -18,10 +18,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# 初始化问答系统（缓存）
+# 初始化问答系统（缓存，自动从环境变量读取）
 @st.cache_resource
 def init_qa():
-    return PlantQASystem("bolt://localhost:7687", "neo4j", "12345678")
+    return PlantQASystem()
 
 qa = init_qa()
 
@@ -44,7 +44,6 @@ with st.sidebar:
     if selected_plant:
         detail = qa.get_plant_detail(selected_plant)
         if detail:
-            # ---------- 使用原生Streamlit组件展示信息卡片 ----------
             st.markdown("---")
             st.subheader(f"🌿 {detail['name']}")
             st.caption(f"*{detail['latin']}*")
@@ -64,7 +63,6 @@ with st.sidebar:
             # 详细象征（如果有）
             if detail['symbols']:
                 st.markdown("**🔖 详细象征**")
-                # 以标签形式展示，使用st.chip或st.write均可，这里简单用逗号连接
                 st.write("、".join(detail['symbols']))
             
             # 药用价值
@@ -156,5 +154,5 @@ if "history" in st.session_state and st.session_state.history:
 st.markdown("---")
 st.markdown(
     "🌿 数据来源：荆楚植物文化图谱 · Neo4j知识图谱 · 免费问答系统",
-    unsafe_allow_html=False  # 纯文本，不需要HTML
+    unsafe_allow_html=False
 )
