@@ -1,0 +1,16 @@
+# 数据库相关
+neo4j==5.14.0
+pandas==2.2.2              # 支持 Python 3.12
+
+# 自然语言处理（轻量级）
+jieba==0.42.1
+
+# Web 框架
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+streamlit==1.28.1
+
+# 其他工具
+python-dotenv==1.0.0
+openpyxl==3.1.2
+requests==2.31.0
